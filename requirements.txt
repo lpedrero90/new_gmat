@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dotenv
+keycove
+langchain-openai
+langchain-community
+langchain-chroma
+psycopg2
