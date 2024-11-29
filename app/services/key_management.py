@@ -1,5 +1,5 @@
-from db.models import Key
-from core.config import settings
+from app.db.models import Key
+from app.core.config import settings
 from keycove import encrypt, decrypt, hash, generate_token
 from sqlalchemy.orm import Session
 

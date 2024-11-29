@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
 # URL de conexión a PostgreSQL en local
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Palomita15@localhost:5432/gmat"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:gmat@localhost:5432/gmat"
 
 # Crear el motor de base de datos con PostgreSQL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

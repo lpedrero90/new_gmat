@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 from typing import List
-from core.security import verify_api_key
-from services import ai, key_management
-from db.session import get_db
+from app.core.security import verify_api_key
+from app.services import ai, key_management
+from app.db.session import get_db
 from sqlalchemy.orm import Session
-from services.key_management import create_api_key, decrypt_api_key, get_keys
+from app.services.key_management import create_api_key, decrypt_api_key, get_keys
 from pydantic import BaseModel
 
 class ChatRequest(BaseModel):

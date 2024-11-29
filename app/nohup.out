@@ -1,0 +1,6 @@
+INFO:     Started server process [48178]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:34212 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56272 - "GET /upload_file HTTP/1.1" 405 Method Not Allowed
