@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
     question: str
+    user_gmat: int
 
 router = APIRouter()
 
@@ -21,13 +22,22 @@ async def upload_file(
 
     return await ai.process_upload(files, user_id, db)
 
-@router.post("/chat")
-async def chat_endpoint(
+@router.post("/chat-doc")
+async def chat_doc_endpoint(
     request: ChatRequest, 
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
     return await ai.get_bot_response(request.question, user_id, db)
+
+@router.post("/chat-sql")
+async def chat_sql_endpoint(
+    request: ChatRequest, 
+    user_id: int = Depends(verify_api_key),
+    db: Session = Depends(get_db)
+):
+    return await ai.get_sql_bot_response(request.question, request.user_gmat, db)
+
 
 
 @router.post("/create_api_key")
