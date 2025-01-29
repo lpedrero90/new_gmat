@@ -1,8 +1,11 @@
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
-from db.models import Key, Permission
-from db.session import get_db
-from services.key_management import hash
+#from db.models import Key, Permission
+from app.db.models import Key, Permission
+#from db.session import get_db
+from app.db.session import get_db
+#from services.key_management import hash
+from app.services.key_management import hash
 
 def verify_api_key(api_key: str = Header(None), db: Session = Depends(get_db)) -> None:
     key = db.query(Key).filter(Key.hashed_key == hash(api_key)).first()
