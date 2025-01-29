@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, Form
 from typing import List
-from core.security import verify_api_key
+from core.security import verify_api_key, check_permissions
 from services import ai, key_management
 from db.session import get_db
 from sqlalchemy.orm import Session
@@ -11,6 +11,10 @@ class ChatRequest(BaseModel):
     question: str
     user_gmat: int
 
+class ExtractDataRequest(BaseModel):
+    category: str
+    user_gmat: int
+
 router = APIRouter()
 
 @router.post("/upload_file")
@@ -19,8 +23,11 @@ async def upload_file(
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
-
-    return await ai.process_upload(files, user_id, db)
+    has_permission = check_permissions('pdf', user_id)
+    if has_permission:
+        return await ai.process_upload(files, user_id, db)
+    else:
+        return 'You dont have permissions'
 
 @router.post("/chat-doc")
 async def chat_doc_endpoint(
@@ -28,7 +35,12 @@ async def chat_doc_endpoint(
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
-    return await ai.get_bot_response(request.question, user_id, db)
+    has_permission = check_permissions('pdf', user_id)
+    if has_permission:
+        return await ai.get_bot_response(request.question, user_id, db)
+    else:
+        return 'You dont have permissions'
+    
 
 @router.post("/chat-sql")
 async def chat_sql_endpoint(
@@ -36,8 +48,27 @@ async def chat_sql_endpoint(
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
-    return await ai.get_sql_bot_response(request.question, request.user_gmat, db)
+    has_permission = check_permissions('sql', user_id, db)
+    if has_permission:
+        return await ai.get_sql_bot_response(request.question, request.user_gmat, db)
+    else:
+        return 'You dont have permissions'
+    
 
+@router.post("/extract-data")
+async def extract_data_endpoint(
+    file: UploadFile = File(...), 
+    category: str = Form(),
+    user_gmat: str = Form(),
+    user_id: int = Depends(verify_api_key),
+    db: Session = Depends(get_db)
+):
+    has_permission = check_permissions('read_doc', user_id, db)
+    if has_permission:
+        return await ai.get_data_json_response(file, category, user_gmat, db)
+    else:
+        return 'You dont have permissions'
+    
 
 
 @router.post("/create_api_key")

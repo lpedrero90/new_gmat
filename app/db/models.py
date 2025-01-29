@@ -27,6 +27,8 @@ class Permission(Base):
     api_key_id = Column(Integer, ForeignKey("keys.id"), nullable=False)
     has_pdf = Column(Boolean, default=False)
     has_sql = Column(Boolean, default=False)
+    has_read_doc = Column(Boolean, default=False)
+    sql_table = Column(String, nullable=True)
 
     user = relationship("User", back_populates="permissions")
     api_key = relationship("Key", back_populates="permissions")
