@@ -27,7 +27,7 @@ async def upload_file(
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
-    has_permission = check_permissions('pdf', user_id)
+    has_permission = check_permissions('pdf', user_id, db)
     if has_permission:
         return await ai.process_upload(files, user_id, db)
     else:
@@ -39,7 +39,7 @@ async def chat_doc_endpoint(
     user_id: int = Depends(verify_api_key),
     db: Session = Depends(get_db)
 ):
-    has_permission = check_permissions('pdf', user_id)
+    has_permission = check_permissions('pdf', user_id, db)
     if has_permission:
         return await ai.get_bot_response(request.question, user_id, db)
     else:
