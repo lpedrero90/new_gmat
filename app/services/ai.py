@@ -86,6 +86,14 @@ class TextExtract(BaseModel):
     main_text_en: str = Field(description="The main text on the file translated to English")
     objects_in_image: str = Field(description="Any other objects observed in the image")
 
+
+class TicketInformation(BaseModel):
+    empresa: str = Field()
+    cif: str = Field()
+    direccion: str = Field()
+    total: str = Field()
+    iva: str = Field()
+
 class ImageInformation(BaseModel):
     numero_informe: str = Field()
     empresa_distribucion_electrica: str = Field()
@@ -137,7 +145,7 @@ class ImageInformation(BaseModel):
     observaciones: str = Field()
 
 parser = JsonOutputParser(pydantic_object=ImageInformation)
-
+ticket_parser = JsonOutputParser(pydantic_object=TicketInformation)
 
 async def extract_main_topic(text: str, db: Session) -> str:
     """
@@ -345,7 +353,7 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
 async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> str:
     logger.info('Get SQL Bot response')
 
-    question = question + ". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa en la respuesta."
+    question = question + ". Filtra en los datos where IdEmpresa=218. No devuelvas en ningún caso el IdEmpresa en la respuesta."
 
     examples = [
         {
@@ -496,6 +504,57 @@ async def get_data_json_response(file: UploadFile, category: str, user_gmat: int
 
     vision_prompt = """Extrae los datos escritos a mano de la fotografía. Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
     vision_chain = load_image_chain | image_model | parser
+    #try:
+    logger.info('Vision chain')
+    return vision_chain.invoke(
+        {"file_path": f"{file_path}", "prompt": vision_prompt}
+    )
+
+
+@chain
+def ticket_model(inputs: dict):
+    logger.info('Ticket model')
+    model = ChatOpenAI(
+        temperature=1,
+        model="gpt-4o-mini"
+    )
+    msg = model.invoke(
+        [
+            HumanMessage(
+                content=[
+                    {"type": "text", "text": inputs["prompt"]},
+                    {"type": "text", "text": ticket_parser.get_format_instructions()},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{inputs['image']}"
+                        },
+                    },
+                ]
+            )
+        ]
+    )
+    return msg.content
+
+async def get_ticket_json_response(file: UploadFile, user_gmat: int, db:Session) -> dict:
+    logger.info('Get ticket JSON response')
+    # Aquí puedes agregar la lógica para guardar el archivo en el servidor
+    # Por ejemplo, guardar el archivo en un directorio específico
+    with open(f"app/uploads/extract/{file.filename}", "wb") as buffer:
+        buffer.write(await file.read())
+
+    file_path = f"app/uploads/extract/{file.filename}"
+
+    #If category is type1
+    logger.info('Parser')
+
+    logger.info('Transformation Chain')
+    load_image_chain = TransformChain(
+        input_variables=["file_path"], output_variables=["image"], transform=load_image
+    )
+
+    vision_prompt = """Extrae los datos escritos a mano de la fotografía. Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
+    vision_chain = load_image_chain | ticket_model | ticket_parser
     #try:
     logger.info('Vision chain')
     return vision_chain.invoke(

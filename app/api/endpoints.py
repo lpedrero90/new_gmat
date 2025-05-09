@@ -75,6 +75,20 @@ async def extract_data_endpoint(
     
 
 
+@router.post("/extract-ticket")
+async def extract_ticket_endpoint(
+    file: UploadFile = File(...),
+    user_gmat: str = Form(),
+    user_id: int = Depends(verify_api_key),
+    db: Session = Depends(get_db)
+):
+    has_permission = check_permissions('read_doc', user_id, db)
+    if has_permission:
+        return await ai.get_ticket_json_response(file, user_gmat, db)
+    else:
+        return 'You dont have permissions'
+
+
 @router.post("/create_api_key")
 def create_api_key_endpoint(db: Session = Depends(get_db)):
     return create_api_key(db)

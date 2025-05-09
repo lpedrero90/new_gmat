@@ -1,3 +1,5 @@
 app/uploads/
+app/venv/
 app/chroma_langchain_db/
 .env
+ai.log
