@@ -293,6 +293,8 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     user = db.query(User).filter(User.id == user_id).first()
     apikey = user.whabble_apikey
     chatflow = user.whabble_chatflow_id
+    print(apikey)
+    print(chatflow)
     
     api_url = f"https://whabble.nevrom.com/api/v1/prediction/{chatflow}"
     headers = {"Authorization": f"Bearer {apikey}"}
@@ -303,7 +305,8 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     try:
         response = requests.post(api_url, headers=headers, json=data)
         return response.json().text
-    except:
+    except Exception as e:
+        print(e)
         return 'Ha habido un problema con los permisos del usuario'
     # Extraer los topics del usuario
     # logger.info('Get all user topics')
