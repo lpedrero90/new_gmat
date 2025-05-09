@@ -38,6 +38,7 @@ from app.db.models import Topic, Document, User
 import base64
 import os
 import requests
+import json
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='ai.log', level=logging.DEBUG) #encoding='utf-8', 
@@ -293,22 +294,17 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     user = db.query(User).filter(User.id == user_id).first()
     apikey = user.whabble_apikey
     chatflow = user.whabble_chatflow_id
-    print(apikey)
-    print(chatflow)
-    print(question)
     
     api_url = f"https://whabble.nevrom.com/api/v1/prediction/{chatflow}"
     headers = {"Authorization": f"Bearer {apikey}"}
 
-    data = {
-        "question": question
-    }
+    payload = json.dumps({
+        "question": payload
+        })
     try:
-        response = requests.post(api_url, headers=headers, json=data)
-        print(response)
+        response = requests.post(api_url, headers=headers, json=payload)
         res = response.json()
-        print(res)
-        return res
+        return res.text
     except Exception as e:
         print(e)
         return 'Ha habido un problema con los permisos del usuario'
