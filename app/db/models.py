@@ -16,6 +16,9 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     gmat_id = Column(String, unique=True, nullable=False)
+    whabble_apikey = Column(String, nullable=True)
+    whabble_chatflow_id = Column(String, nullable=True)
+    whabble_document_store_id = Column(String, nullable=True)
 
     permissions = relationship("Permission", back_populates="user")
     documents = relationship("Document", back_populates="user")
