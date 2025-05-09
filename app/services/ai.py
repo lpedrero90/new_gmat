@@ -305,7 +305,7 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     try:
         response = requests.post(api_url, headers=headers, json=data)
         res = response.json()
-
+        print(res)
         return res
     except Exception as e:
         print(e)
