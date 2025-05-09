@@ -299,7 +299,7 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     headers = {"Authorization": f"Bearer {apikey}"}
 
     payload = json.dumps({
-        "question": payload
+        "question": question
         })
     try:
         response = requests.post(api_url, headers=headers, json=payload)
