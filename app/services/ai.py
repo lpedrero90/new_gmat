@@ -304,7 +304,7 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     try:
         response = requests.post(api_url, headers=headers, json=payload)
         res = response.json()
-        return res.text
+        return res['text']
     except Exception as e:
         print(e)
         return 'Ha habido un problema con los permisos del usuario'
