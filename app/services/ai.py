@@ -304,6 +304,9 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     print(payload)
     try:
         print("AQUI")
+        print(api_url)
+        print(headers)
+        print(payload)
         response = requests.request("POST", api_url, headers=headers, data=payload)
         print(response)
         res = response.json()
