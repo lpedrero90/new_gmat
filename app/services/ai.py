@@ -298,7 +298,7 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     api_url = f"https://whabble.nevrom.com/api/v1/prediction/{chatflow}"
     headers = {
         "Authorization": f"{apikey}",
-        #"Content-Type": "application/json"
+        "Content-Type": "application/json"
         }
 
     payload = json.dumps({
