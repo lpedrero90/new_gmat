@@ -299,18 +299,12 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
     headers = {"Authorization": f"Bearer {apikey}"}
 
     payload = json.dumps({
-        "question": "Que es el arathane?"
+        "question": question
         })
-    print(payload)
+
     try:
-        print("AQUI")
-        print(api_url)
-        print(headers)
-        print(payload)
         response = requests.request("POST", api_url, headers=headers, data=payload)
-        print(response)
         res = response.json()
-        print(res)
         return res['text']
     except Exception as e:
         print(e)
