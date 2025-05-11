@@ -280,7 +280,7 @@ async def process_upload(files: List, user_id: int, db: Session) -> str:
     return {"message": "Files uploaded and processed successfully."}
 
 
-async def get_bot_response(question: str, user_id: int, db: Session) -> str:
+async def get_bot_response(question: str, user_id: int, db: Session, history: list = []) -> str:
     """
     Generates a response for a given question based on retrieved documents.
 
@@ -302,7 +302,8 @@ async def get_bot_response(question: str, user_id: int, db: Session) -> str:
         }
 
     payload = json.dumps({
-        "question": question
+        "question": question,
+        "history": history
         })
 
     try:

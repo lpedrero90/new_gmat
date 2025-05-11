@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, UploadFile, Form
-from typing import List
+from typing import List, Optional
 #from core.security import verify_api_key, check_permissions
 from app.core.security import verify_api_key, check_permissions
 #from services import ai, key_management
@@ -14,6 +14,7 @@ from pydantic import BaseModel
 class ChatRequest(BaseModel):
     question: str
     user_gmat: int
+    history: Optional[List[str]] = None
 
 class ExtractDataRequest(BaseModel):
     category: str
@@ -41,7 +42,7 @@ async def chat_doc_endpoint(
 ):
     has_permission = check_permissions('pdf', user_id, db)
     if has_permission:
-        return await ai.get_bot_response(request.question, user_id, db)
+        return await ai.get_bot_response(request.question, user_id, db, request.history)
     else:
         return 'You dont have permissions'
     
