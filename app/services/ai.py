@@ -302,12 +302,13 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
         }
     
     converted_history = []
-    for index, message in enumerate(history):
-        role = "apiMessage" if index % 2 == 1 else "userMessage"
-        converted_history.append({
-            "role": role,
-            "content": message
-        })
+    if len(history) > 0:
+        for index, message in enumerate(history):
+            role = "apiMessage" if index % 2 == 1 else "userMessage"
+            converted_history.append({
+                "role": role,
+                "content": message
+            })
 
     payload = json.dumps({
         "question": question,
