@@ -305,7 +305,7 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
     converted_history = []
     if history:
         for index, message in enumerate(history):
-            role = "apiMessage" if index % 2 == 1 else "userMessage"
+            role = "userMessage" if index % 2 == 1 else "apiMessage"
             converted_history.append({
                 "role": role,
                 "content": message
