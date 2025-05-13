@@ -300,6 +300,7 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
         "Authorization": f"{apikey}",
         "Content-Type": "application/json"
         }
+    print(history)
     
     converted_history = []
     if history:
