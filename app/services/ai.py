@@ -26,7 +26,7 @@ from langchain_core.prompts import (
 
 
 from keycove import decrypt, hash, generate_token
-from typing import List, Any
+from typing import List, Optional
 from uuid import uuid4
 from fastapi import UploadFile
 from openai import OpenAI
@@ -90,10 +90,15 @@ class TextExtract(BaseModel):
 
 class TicketInformation(BaseModel):
     empresa: str = Field()
-    cif: str = Field()
-    direccion: str = Field()
+    direccion: Optional[str] = Field()
+    cif: Optional[str] = Field()
+    fecha: str = Field()
+    base_imponible: str = Field()
+    iva_porcentaje: str = Field()
+    iva_cantidad: str = Field()
+    descuento: Optional[str] = Field()
     total: str = Field()
-    iva: str = Field()
+    
 
 class ImageInformation(BaseModel):
     numero_informe: str = Field()
@@ -386,8 +391,9 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
 
 async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> str:
     logger.info('Get SQL Bot response')
+    print("USER GMAT", user_gmat)
 
-    question = question + ". Filtra en los datos where IdEmpresa=218. No devuelvas en ningún caso el IdEmpresa en la respuesta."
+    question = question + f". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa en la respuesta."
 
     examples = [
         {
