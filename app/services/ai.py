@@ -48,6 +48,9 @@ logging.basicConfig(filename='ai.log', level=logging.DEBUG) #encoding='utf-8',
 # Set up OpenAI API configuration (you may choose to load these from environment variables)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+EMBEDDING_CREDENTIAL = os.getenv("EMBEDDING_CREDENTIAL")
+PINECONE_CREDENTIAL = os.getenv("PINECONE_CREDENTIAL")
+DB_CREDENTIAL = os.getenv("DB_CREDENTIAL")
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHAT_MODEL = "gpt-4o-mini"
 COLLECTION_NAME = "example_collection"
@@ -240,6 +243,51 @@ async def load_pdf_file(file: UploadFile, user_id: int, db: Session) -> str:
     return pages
 
 
+# async def process_upload(files: List, user_id: int, db: Session) -> str:
+#     """
+#     Processes uploaded files, splits them, and saves to the vector store with extracted topics.
+
+#     Parameters:
+#     files (List): List of UploadFile objects
+#     extractor_function: Function to extract main topic
+
+#     Returns:
+#     dict: Success message upon completion
+#     """
+#     logger.info('Process upload')
+#     content = []
+#     for file in files:
+#         if file.filename.endswith('.txt'):
+#             #content = await extractor_function(file)
+#             pass
+#         elif file.filename.endswith('.pdf'):
+#             pages_from_pdf = await load_pdf_file(file, user_id, db)
+#             content.extend(pages_from_pdf)  # Assuming load_pdf_file returns a list of pages
+#         elif file.filename.endswith('.docx'):
+#             #content = extractor_function(file)
+#             pass
+#         else:
+#             logger.error('Unsopported file format')
+#             raise ValueError("Unsupported file format.")
+
+#     if not content:
+#         logger.error('No pages to process')
+#         raise ValueError("No pages to process.")
+
+#     #uuids = [str(uuid4()) for _ in range(len(content))]
+#     logger.info('Character Text splitter')
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, add_start_index=True)
+#     logger.info('Text splitter')
+#     all_splits = text_splitter.split_documents(content)
+
+#     logger.info('Match uuids')
+#     uuids = [str(uuid4()) for _ in range(len(all_splits))]  # Match uuids to the number of splits
+#     logger.info('Add documents to vector store')
+#     vector_store.add_documents(documents=all_splits, ids=uuids)
+
+#     return {"message": "Files uploaded and processed successfully."}
+
+
 async def process_upload(files: List, user_id: int, db: Session) -> str:
     """
     Processes uploaded files, splits them, and saves to the vector store with extracted topics.
@@ -252,38 +300,116 @@ async def process_upload(files: List, user_id: int, db: Session) -> str:
     dict: Success message upon completion
     """
     logger.info('Process upload')
-    content = []
+    error = 0
+    user = db.query(User).filter(User.id == user_id).first()
+    DOC_STORE_ID = user.whabble_document_store_id
+    API_URL = f"https://whabble.nevrom.com/api/v1/document-store/upsert/{DOC_STORE_ID}"
+    API_KEY = user.whabble_apikey
+    
     for file in files:
-        if file.filename.endswith('.txt'):
-            #content = await extractor_function(file)
-            pass
-        elif file.filename.endswith('.pdf'):
-            pages_from_pdf = await load_pdf_file(file, user_id, db)
-            content.extend(pages_from_pdf)  # Assuming load_pdf_file returns a list of pages
-        elif file.filename.endswith('.docx'):
-            #content = extractor_function(file)
-            pass
-        else:
-            logger.error('Unsopported file format')
-            raise ValueError("Unsupported file format.")
+        if file.filename.endswith('.pdf'):
+            with open(f"app/uploads/{file.filename}", "wb") as buffer:
+                try:                                          
+                    buffer.write(await file.read())
+                except Exception as e:
+                    logger.error('Error writing in buffer: {e}')
 
-    if not content:
-        logger.error('No pages to process')
-        raise ValueError("No pages to process.")
+            #Vincular el archivo a lo de GMAT
+            new_document = Document(filename=file.filename, user_id=user_id)
+            db.add(new_document)
+            try:
+                db.commit()
+            except Exception as e:
+                logger.error('Error commiting document into db: {e}')
+                
+            file_path = f"app/uploads/{file.filename}"
+    
+            print(f"Procesando: {file.filename}")
 
-    #uuids = [str(uuid4()) for _ in range(len(content))]
-    logger.info('Character Text splitter')
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, add_start_index=True)
-    logger.info('Text splitter')
-    all_splits = text_splitter.split_documents(content)
+            form_data = {
+                "files": (f"{file.filename}", open(f"{file_path}", 'rb'))
+            }
 
-    logger.info('Match uuids')
-    uuids = [str(uuid4()) for _ in range(len(all_splits))]  # Match uuids to the number of splits
-    logger.info('Add documents to vector store')
-    vector_store.add_documents(documents=all_splits, ids=uuids)
+            loader = {
+                "name": "pdfFile",
+                "config": {
+                } # you can leave empty to use default config
+            }
 
-    return {"message": "Files uploaded and processed successfully."}
+            splitter = {
+                "name": "recursiveCharacterTextSplitter",
+                "config": {
+                    "chunkSize": 1500,
+                    "chunkOverlap": 750
+                }
+            }
 
+            embedding = {
+                "name": "openAIEmbeddings",
+                "config": {
+                    "modelName": "text-embedding-3-small",
+                    "credential": EMBEDDING_CREDENTIAL
+                }
+            }
+
+            vectorStore = {
+                "name": "pinecone",
+                "config": {
+                    "pineconeIndex": "gmatwhabble",
+                    "pineconeNamespace": "exver",
+                    "searchType":"similarity",
+                    "credential":  PINECONE_CREDENTIAL
+                }
+            }
+
+            recordManager = {
+                "name": "postgresRecordManager",
+                "config": {
+                    "cleanup": "none",
+                    "credential": DB_CREDENTIAL,
+                    "database": "retrieval",
+                    "host":"localhost",
+                    "namespace":"exver",
+                    "port":"5432",
+                    "sourceIdKey":"source",
+                    "ssl":True
+                }
+            }
+
+            body_data = {
+                #"docId": DOC_LOADER_ID,
+                #"replaceExisting": False,
+                "loader": json.dumps(loader),
+                "splitter": json.dumps(splitter),
+                "embedding": json.dumps(embedding),
+                "vectorStore": json.dumps(vectorStore),
+                "recordManager": json.dumps(recordManager)
+            }
+
+            headers = {
+                "Authorization": f"Bearer {API_KEY}"
+            }
+
+            try:  
+                response = requests.post(
+                    API_URL, 
+                    files=form_data, 
+                    data=body_data, 
+                    headers=headers, 
+                    verify=False
+                )
+               
+                print(response)
+            except Exception as e:
+                error = error + 1
+                logger.error(f'Error uploading file {file.filename}: {e}')
+            
+
+
+    return {"message": f"Files uploaded with {error} errors."}
+
+async def delete_upload(file: int, user_id, db: Session):
+    pass
 
 async def get_bot_response(question: str, user_id: int, db: Session, history: list = []) -> str:
     """
