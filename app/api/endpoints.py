@@ -75,7 +75,7 @@ async def extract_data_endpoint(
         return 'You dont have permissions'
     
 @router.post("/extract-report")
-async def extract_data_endpoint(
+async def extract_report_endpoint(
     file: UploadFile = File(...), 
     user_gmat: str = Form(),
     user_id: int = Depends(verify_api_key),
