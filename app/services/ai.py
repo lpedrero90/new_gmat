@@ -780,7 +780,7 @@ async def get_report_json_response(file: UploadFile, user_gmat: int, db:Session)
         input_variables=["file_path"], output_variables=["image"], transform=load_image
     )
 
-    vision_prompt = """Extrae los datos escritos a mano de la fotografía. Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
+    vision_prompt = """Extrae los datos escritos a mano del informe. El informe es semanal, cada grupo de columnas es un día de la semana, las filas son las tareas realizadas por cada día.Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
     vision_chain = load_image_chain | report_model | report_parser
     #try:
     logger.info('Vision chain')
