@@ -101,7 +101,20 @@ class TicketInformation(BaseModel):
     iva_cantidad: str = Field()
     descuento: Optional[str] = Field()
     total: str = Field()
-    
+
+class Item(BaseModel):
+    dayWeek: str = Field(description="Día de la semana de lunes a viernes.")
+    time: str = Field(description="tiempo que tardan en hacer la tarea, con el formato, por ejemplo 15min, 30min, 1h...")
+    code: str = Field(description="codigo de la tarea, por ejemplo: I081911, I082144M, I082050M")
+    quantity: int = Field(description="cantidad de unidades realizadas en numero entero")
+
+class ReportInformation(BaseModel):
+    section: str = Field(description="seccion en la que se realiza la tarea, por ejemplo MONTAJE")
+    worker: str = Field(description="Nombre del trabajador, por ejemplo NATALIA")
+    date: str = Field(description="fecha, con el formato dd/mm/yy, por ejemplo 13/06/25")
+    role: str = Field(description="cargo del trabajador, por ejemplo OPERARIO")
+    items: list[Item] = Field(description="lista de tareas realizadas en el turno")
+
 
 class ImageInformation(BaseModel):
     numero_informe: str = Field()
@@ -155,6 +168,7 @@ class ImageInformation(BaseModel):
 
 parser = JsonOutputParser(pydantic_object=ImageInformation)
 ticket_parser = JsonOutputParser(pydantic_object=TicketInformation)
+report_parser = JsonOutputParser(pydantic_object=ReportInformation)
 
 async def extract_main_topic(text: str, db: Session) -> str:
     """
@@ -514,7 +528,6 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
     # response = rag_chain.invoke(question)
     return response
 
-
 async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> str:
     logger.info('Get SQL Bot response')
     print("USER GMAT", user_gmat)
@@ -614,7 +627,6 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
 
     return response['output']
 
-
 def load_image(inputs: dict) -> dict:
     logger.info('Load image')
     image_path = inputs["file_path"]
@@ -676,7 +688,6 @@ async def get_data_json_response(file: UploadFile, category: str, user_gmat: int
         {"file_path": f"{file_path}", "prompt": vision_prompt}
     )
 
-
 @chain
 def ticket_model(inputs: dict):
     logger.info('Ticket model')
@@ -721,6 +732,56 @@ async def get_ticket_json_response(file: UploadFile, user_gmat: int, db:Session)
 
     vision_prompt = """Extrae los datos escritos a mano de la fotografía. Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
     vision_chain = load_image_chain | ticket_model | ticket_parser
+    #try:
+    logger.info('Vision chain')
+    return vision_chain.invoke(
+        {"file_path": f"{file_path}", "prompt": vision_prompt}
+    )
+
+@chain
+def report_model(inputs: dict):
+    logger.info('Report model')
+    model = ChatOpenAI(
+        temperature=1,
+        model="gpt-4o-mini"
+    )
+    msg = model.invoke(
+        [
+            HumanMessage(
+                content=[
+                    {"type": "text", "text": inputs["prompt"]},
+                    {"type": "text", "text": report_parser.get_format_instructions()},
+                    {
+                        "type": "image_url",    
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{inputs['image']}"
+                        },
+                    },
+                ]
+            )
+        ]
+    )
+    return msg.content
+
+async def get_report_json_response(file: UploadFile, user_gmat: int, db:Session) -> dict:
+    logger.info('Get report JSON response')
+    # Aquí puedes agregar la lógica para guardar el archivo en el servidor
+    # Por ejemplo, guardar el archivo en un directorio específico
+    with open(f"app/uploads/extract/{file.filename}", "wb") as buffer:
+        buffer.write(await file.read())
+
+    file_path = f"app/uploads/extract/{file.filename}"
+
+    #If category is type1
+    logger.info('Parser')
+
+    logger.info('Transformation Chain')
+    load_image_chain = TransformChain(
+        input_variables=["file_path"], output_variables=["image"], transform=load_image
+    )
+
+    vision_prompt = """Extrae los datos escritos a mano de la fotografía. Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos."""
+    vision_chain = load_image_chain | report_model | report_parser
     #try:
     logger.info('Vision chain')
     return vision_chain.invoke(

@@ -74,7 +74,19 @@ async def extract_data_endpoint(
     else:
         return 'You dont have permissions'
     
-
+@router.post("/extract-report")
+async def extract_data_endpoint(
+    file: UploadFile = File(...), 
+    user_gmat: str = Form(),
+    user_id: int = Depends(verify_api_key),
+    db: Session = Depends(get_db)
+):
+    has_permission = check_permissions('read_doc', user_id, db)
+    if has_permission:
+        return await ai.get_report_json_response(file, user_gmat, db)
+    else:
+        return 'You dont have permissions'
+    
 
 @router.post("/extract-ticket")
 async def extract_ticket_endpoint(
