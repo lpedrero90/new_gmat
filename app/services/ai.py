@@ -643,7 +643,7 @@ def image_model(inputs: dict):
     logger.info('Image model')
     model = ChatOpenAI(
         temperature=1,
-        model="gpt-4o-mini"
+        model="gpt-4o"
     )
     msg = model.invoke(
         [
