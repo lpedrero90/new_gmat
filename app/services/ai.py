@@ -743,7 +743,7 @@ def report_model(inputs: dict):
     logger.info('Report model')
     model = ChatOpenAI(
         temperature=1,
-        model="gpt-4o-mini"
+        model="gpt-4o"
     )
     msg = model.invoke(
         [
