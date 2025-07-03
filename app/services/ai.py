@@ -782,6 +782,9 @@ async def get_report_json_response(file: UploadFile, user_gmat: int, db:Session)
 
     vision_prompt = """Extrae los datos escritos a mano del informe. 
     El informe es semanal, cada grupo de columnas es un día de la semana, las filas son las tareas realizadas por cada día.
+    Puede haber múltiples tareas por día, por lo que se debe extraer cada una de ellas.
+    El campo código siempre empieza por I08 y después siguen más números.
+    EL campo tiempo puede ser en minutos o en horas, por lo que se debe tener en cuenta.
     Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos.
     """
     vision_chain = load_image_chain | report_model | report_parser
