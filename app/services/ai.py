@@ -103,17 +103,17 @@ class TicketInformation(BaseModel):
     total: str = Field()
 
 class Task(BaseModel):
-    dayWeek: str = Field(description="Day of the week, from Monday to Friday.")
-    time: str = Field(description="Time taken to complete the task, e.g., 15min, 30min, 1h.")
-    code: str = Field(description="Task code, e.g., I081911, I082144M, I082050M.")
-    quantity: int = Field(description="Number of units completed, as an integer.")
+    dayWeek: str = Field(description="Día de la semana de lunes a viernes.")
+    time: str = Field(description="tiempo que tardan en hacer la tarea, con el formato, por ejemplo 15min, 30min, 1h...")
+    code: str = Field(description="codigo de la tarea, por ejemplo: I081911, I082144M, I082050M")
+    quantity: int = Field(description="cantidad de unidades realizadas en numero entero")
 
 class ReportInformation(BaseModel):
-    section: str = Field(description="Section where the task was performed, e.g., ASSEMBLY.")
-    worker: str = Field(description="Name of the worker, e.g., NATALIA.")
-    date: str = Field(description="Date in dd/mm/yy format, e.g., 13/06/25.")
-    role: str = Field(description="Worker's role, e.g., OPERATOR.")
-    tasks: list[Task] = Field(description="List of tasks performed during the shift.")
+    section: str = Field(description="seccion en la que se realiza la tarea, por ejemplo MONTAJE")
+    worker: str = Field(description="Nombre del trabajador, por ejemplo NATALIA")
+    date: str = Field(description="fecha, con el formato dd/mm/yy, por ejemplo 13/06/25")
+    role: str = Field(description="cargo del trabajador, por ejemplo OPERARIO")
+    tasks: list[Task] = Field(description="lista de tareas realizadas en el turno")
 
 
 class ImageInformation(BaseModel):
@@ -794,7 +794,7 @@ async def get_report_json_response(file: UploadFile, user_gmat: int, db:Session)
     The "code" field always starts with "I08" followed by additional numbers.
     The "time" field can be expressed in minutes or hours, so make sure to account for both formats.
     If a field is empty, set its value to null — do not make up or infer any data."""
-
+    
     vision_chain = load_image_chain | report_model | report_parser
     #try:
     logger.info('Vision chain')
