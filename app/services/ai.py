@@ -102,7 +102,7 @@ class TicketInformation(BaseModel):
     descuento: Optional[str] = Field()
     total: str = Field()
 
-class Item(BaseModel):
+class Task(BaseModel):
     dayWeek: str = Field(description="Día de la semana de lunes a viernes.")
     time: str = Field(description="tiempo que tardan en hacer la tarea, con el formato, por ejemplo 15min, 30min, 1h...")
     code: str = Field(description="codigo de la tarea, por ejemplo: I081911, I082144M, I082050M")
@@ -113,7 +113,7 @@ class ReportInformation(BaseModel):
     worker: str = Field(description="Nombre del trabajador, por ejemplo NATALIA")
     date: str = Field(description="fecha, con el formato dd/mm/yy, por ejemplo 13/06/25")
     role: str = Field(description="cargo del trabajador, por ejemplo OPERARIO")
-    items: list[Item] = Field(description="lista de tareas realizadas en el turno")
+    tasks: list[Task] = Field(description="lista de tareas realizadas en el turno")
 
 
 class ImageInformation(BaseModel):
@@ -780,13 +780,21 @@ async def get_report_json_response(file: UploadFile, user_gmat: int, db:Session)
         input_variables=["file_path"], output_variables=["image"], transform=load_image
     )
 
-    vision_prompt = """Extrae los datos escritos a mano del informe. 
-    El informe es semanal, cada grupo de columnas es un día de la semana, las filas son las tareas realizadas por cada día.
-    Puede haber múltiples tareas por día, por lo que se debe extraer cada una de ellas.
-    El campo código siempre empieza por I08 y después siguen más números.
-    EL campo tiempo puede ser en minutos o en horas, por lo que se debe tener en cuenta.
-    Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos.
-    """
+    # vision_prompt = """Extrae los datos escritos a mano del informe. 
+    # El informe es semanal, cada grupo de columnas es un día de la semana, las filas son las tareas realizadas por cada día.
+    # Puede haber múltiples tareas por día, por lo que se debe extraer cada una de ellas.
+    # El campo código siempre empieza por I08 y después siguen más números.
+    # EL campo tiempo puede ser en minutos o en horas, por lo que se debe tener en cuenta.
+    # Pon el valor null en caso de que el campo esté vacío, no ivnventes los datos.
+    # """
+
+    vision_prompt = """"Extract the handwritten data from the report.
+    The report is weekly; each group of columns represents a day of the week, and the rows correspond to the tasks performed each day.
+    There can be multiple tasks per day, so each task should be extracted individually.
+    The "code" field always starts with "I08" followed by additional numbers.
+    The "time" field can be expressed in minutes or hours, so make sure to account for both formats.
+    If a field is empty, set its value to null — do not make up or infer any data."""
+    
     vision_chain = load_image_chain | report_model | report_parser
     #try:
     logger.info('Vision chain')
