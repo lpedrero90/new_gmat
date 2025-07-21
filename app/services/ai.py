@@ -30,6 +30,7 @@ from typing import List, Optional
 from uuid import uuid4
 from fastapi import UploadFile
 from openai import OpenAI
+from langdetect import detect
 
 from sqlalchemy.orm import Session
 #from db.models import Topic, Document, User
@@ -446,7 +447,18 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
         "Content-Type": "application/json"
         }
     print(history)
-    
+
+    language_iso = detect(question)
+    countries = {
+        'en': 'english',
+        'es': 'spanish',
+        'fr': 'french',
+        'de': 'german',
+        'it': 'italian'
+    }
+    language = countries.get(language_iso, 'spanish')
+
+
     converted_history = []
     if history:
         for index, message in enumerate(history):
@@ -457,7 +469,7 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
             })
 
     payload = json.dumps({
-        "question": question,
+        "question": question + f'. Answer in {language}',
         "history": converted_history
         })
 
