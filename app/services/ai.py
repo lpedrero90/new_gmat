@@ -72,9 +72,10 @@ db_uri = (
 # Añadir tabla de pesos
 db_sql = SQLDatabase.from_uri(
     db_uri,
-    include_tables=['v_PesajeLaura', 'v_EPISLaura'], #Añadir la de EPIs
+    include_tables=['v_PesajeLaura', 'v_EPISLaura', 'v_LineasLaura', 'v_TrazabilidadLaura'], #Añadir la de EPIs
     view_support = True
 )
+print(db_sql.get_usable_table_names())
 
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY, model=EMBEDDING_MODEL)
 vector_store = Chroma(
@@ -90,7 +91,6 @@ class TextExtract(BaseModel):
     main_text: str = Field(description="The main text on the file")
     main_text_en: str = Field(description="The main text on the file translated to English")
     objects_in_image: str = Field(description="Any other objects observed in the image")
-
 
 class TicketInformation(BaseModel):
     empresa: str = Field()
@@ -115,7 +115,6 @@ class ReportInformation(BaseModel):
     date: str = Field(description="fecha, con el formato dd/mm/yy, por ejemplo 13/06/25")
     role: str = Field(description="cargo del trabajador, por ejemplo OPERARIO")
     tasks: list[Task] = Field(description="lista de tareas realizadas en el turno")
-
 
 class ImageInformation(BaseModel):
     numero_informe: str = Field()
@@ -583,6 +582,10 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
                         WHERE idEmpresa=371 AND quienTiene LIKE '%Raul martin%' AND proxima >= getDate();
                     """
         },
+        {
+            "input": "",
+            "query": ""
+        }
     ]
 
     example_selector = SemanticSimilarityExampleSelector.from_examples(
