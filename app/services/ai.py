@@ -72,7 +72,8 @@ db_uri = (
 # Añadir tabla de pesos
 db_sql = SQLDatabase.from_uri(
     db_uri,
-    include_tables=['v_PesajeLaura', 'v_EPISLaura', 'v_TrazabilidadLaura', 'v_LineasLaura', 'v_ProyectosLaura'], #Añadir la de EPIs
+    #include_tables=['v_PesajeLaura', 'v_EPISLaura', 'v_TrazabilidadLaura', 'v_LineasLaura', 'v_ProyectosLaura'], #Añadir la de EPIs
+    include_tables=['v_LineasLaura', 'v_ProyectosLaura'],
     view_support = True
 )
 print(db_sql.get_usable_table_names())
@@ -542,46 +543,53 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
 async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> str:
     logger.info('Get SQL Bot response')
     print("USER GMAT", user_gmat)
+    print("PREGUNTA: " + question)
 
     question = question + f". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa en la respuesta."
 
+    # examples = [
+    #     {
+    #         "input": f"¿Cuántos cascos hay disponibles?",
+    #         "query": f"""SELECT COUNT(*) AS TotalCascosDisponibles FROM v_EPISLaura 
+    #                     WHERE IdEmpresa = 1 
+    #                     AND (Tipo LIKE '%casco%' OR Tipo LIKE '%cascos%') 
+    #                     AND Disponible = 'Disponible';"""
+    #     },
+    #     {
+    #         "input": "¿Quién tiene cascos?",
+    #         "query": """
+    #                 SELECT QuienTiene, Tipo, Disponible 
+    #                 FROM v_EPISLaura 
+    #                 WHERE IdEmpresa = 371 
+    #                 AND (Tipo LIKE '%casco%' OR Tipo LIKE '%cascos%') 
+    #                 AND Disponible = 'No disponible' 
+    #                 ORDER BY QuienTiene;
+    #                 """
+    #     },
+    #     {
+    #         "input": "¿Cuántos equipos hay retirados?",
+    #         "query": """ SELECT count(idEquipo) FROM v_EPISLaura
+    #                     WHERE idEmpresa=371 AND retirado=1
+    #                 """
+    #     },
+    #     {
+    #         "input": "¿Qué personas han tenido el equipo con número de serie 12326/0273?",
+    #         "query": """ SELECT serie, tipo, fecha, quien FROM v_TrazabilidadLaura
+    #                     WHERE idEmpresa=371 AND serie='12326/0273' order by fecha;
+    #                 """
+    #     },
+    #     {
+    #         "input": "¿Cuál es el próximo equipo que tiene que verificar Raúl Martín?",
+    #         "query": """ SELECT serie, tipo, marca, modelo, proxima FROM v_EPISLaura
+    #                     WHERE idEmpresa=371 AND quienTiene LIKE '%Raul martin%' AND proxima >= getDate();
+    #                 """
+    #     },
+    #     {
+    #         "input": "",
+    #         "query": ""
+    #     }
+    # ]
     examples = [
-        {
-            "input": f"¿Cuántos cascos hay disponibles?",
-            "query": f"""SELECT COUNT(*) AS TotalCascosDisponibles FROM v_EPISLaura 
-                        WHERE IdEmpresa = 1 
-                        AND (Tipo LIKE '%casco%' OR Tipo LIKE '%cascos%') 
-                        AND Disponible = 'Disponible';"""
-        },
-        {
-            "input": "¿Quién tiene cascos?",
-            "query": """
-                    SELECT QuienTiene, Tipo, Disponible 
-                    FROM v_EPISLaura 
-                    WHERE IdEmpresa = 371 
-                    AND (Tipo LIKE '%casco%' OR Tipo LIKE '%cascos%') 
-                    AND Disponible = 'No disponible' 
-                    ORDER BY QuienTiene;
-                    """
-        },
-        {
-            "input": "¿Cuántos equipos hay retirados?",
-            "query": """ SELECT count(idEquipo) FROM v_EPISLaura
-                        WHERE idEmpresa=371 AND retirado=1
-                    """
-        },
-        {
-            "input": "¿Qué personas han tenido el equipo con número de serie 12326/0273?",
-            "query": """ SELECT serie, tipo, fecha, quien FROM v_TrazabilidadLaura
-                        WHERE idEmpresa=371 AND serie='12326/0273' order by fecha;
-                    """
-        },
-        {
-            "input": "¿Cuál es el próximo equipo que tiene que verificar Raúl Martín?",
-            "query": """ SELECT serie, tipo, marca, modelo, proxima FROM v_EPISLaura
-                        WHERE idEmpresa=371 AND quienTiene LIKE '%Raul martin%' AND proxima >= getDate();
-                    """
-        },
         {
             "input": "",
             "query": ""
