@@ -542,8 +542,7 @@ async def get_bot_response(question: str, user_id: int, db: Session, history: li
 
 async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> str:
     logger.info('Get SQL Bot response')
-    print("USER GMAT", user_gmat)
-    print("PREGUNTA: " + question)
+    print(f"USER: {user_gmat} y PREGUNTA: {question}")
 
     question = question + f". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa en la respuesta."
 
