@@ -544,7 +544,7 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
     logger.info('Get SQL Bot response')
     print(f"USER: {user_gmat} y PREGUNTA: {question}")
 
-    question = question + f". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa en la respuesta."
+    question = question + f". Filtra en los datos where IdEmpresa={user_gmat}. No devuelvas en ningún caso el IdEmpresa o cualquier id en la respuesta, siempre devuelve en su lugar el nombre asociado."
 
     # examples = [
     #     {
@@ -590,8 +590,10 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
     # ]
     examples = [
         {
-            "input": "",
-            "query": ""
+            "input": "¿Cuántos proyectos hay activos?",
+            "query": """select * from v_ProyectosLaura
+                        where idEmpresa=218 and 
+                        ([Fecha de Fin del Proyecto]> CAST(GETDATE() AS DATE) OR [Fecha de Fin del Proyecto] IS NULL);"""
         }
     ]
 
