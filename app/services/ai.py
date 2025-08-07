@@ -584,16 +584,16 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
     #                 """
     #     },
     #     {
-    #         "input": "",
-    #         "query": ""
+    #         "input": "¿Cuántos proyectos hay activos?",
+            # "query": """select * from v_ProyectosLaura
+            #             where idEmpresa=218 and 
+            #             ([Fecha de Fin del Proyecto]> CAST(GETDATE() AS DATE) OR [Fecha de Fin del Proyecto] IS NULL);"""
     #     }
     # ]
     examples = [
         {
-            "input": "¿Cuántos proyectos hay activos?",
-            "query": """select * from v_ProyectosLaura
-                        where idEmpresa=218 and 
-                        ([Fecha de Fin del Proyecto]> CAST(GETDATE() AS DATE) OR [Fecha de Fin del Proyecto] IS NULL);"""
+            "input": "",
+            "query": ""
         }
     ]
 
