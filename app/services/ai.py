@@ -72,8 +72,8 @@ db_uri = (
 # Añadir tabla de pesos
 db_sql = SQLDatabase.from_uri(
     db_uri,
-    #include_tables=['v_PesajeLaura', 'v_EPISLaura', 'v_TrazabilidadLaura', 'v_LineasLaura', 'v_ProyectosLaura'], #Añadir la de EPIs
-    include_tables=['v_LineasLaura', 'v_ProyectosLaura'],
+    include_tables=['v_PesajeLaura', 'v_EPISLaura', 'v_TrazabilidadLaura', 'v_LineasLaura', 'v_ProyectosLaura'], #Añadir la de EPIs
+    #include_tables=['v_LineasLaura', 'v_ProyectosLaura'],
     view_support = True
 )
 print(db_sql.get_usable_table_names())
