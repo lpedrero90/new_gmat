@@ -620,7 +620,7 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
 
     DO NOT answer with the IdEmpresa.
 
-    Answer only with the data requested, do not add any other information.
+    Answer only with the data requested, do not add any other irrelevant information. You can add some text to explain the data, but not more than that. Do not add columns in your answer that you have not been asked for.
 
     Here are some examples of user inputs and their corresponding SQL queries:"""
 
