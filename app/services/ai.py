@@ -620,6 +620,8 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
 
     DO NOT answer with the IdEmpresa.
 
+    Answer only with the data requested, do not add any other information.
+
     Here are some examples of user inputs and their corresponding SQL queries:"""
 
     few_shot_prompt = FewShotPromptTemplate(
