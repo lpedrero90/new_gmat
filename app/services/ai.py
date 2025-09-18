@@ -619,9 +619,8 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
     If the question does not seem related to the database, just return "I don't know" as the answer.
 
     DO NOT ANSWER with the name of the company unless specifically asked for it.
-    WHEN ASKED ABOUT THE COMPANY, DO NOT answer with the IdEmpresa, use the name of the company instead.
-
-    Answer only with the data requested, do not add any other irrelevant information. You can add some text to explain the data, but not more than that. Do not add columns in your answer that you have not been asked for.
+    
+    DO NOT answer with the IdEmpresa, IdEmpresa is a protected field that user cannot see.
 
     Here are some examples of user inputs and their corresponding SQL queries:"""
 
