@@ -616,11 +616,17 @@ async def get_sql_bot_response(question: str, user_gmat: int, db: Session) -> st
 
     DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
 
+    DO all 
+
     If the question does not seem related to the database, just return "I don't know" as the answer.
 
     DO NOT ANSWER with the name of the company unless specifically asked for it.
     
     DO NOT answer with the IdEmpresa, IdEmpresa is a protected field that user cannot see.
+
+    When generating conditional filters involving text or string comparisons, ALWAYS USE the `LIKE` operator instead of `=`.  
+    If the user input is meant to match partially or case-insensitively, include wildcards (`%`) appropriately (e.g. `column_name LIKE '%value%'`).  
+    Use `=` only for numeric or exact ID-based matches.
 
     Here are some examples of user inputs and their corresponding SQL queries:"""
 
