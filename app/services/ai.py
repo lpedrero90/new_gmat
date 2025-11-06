@@ -103,6 +103,7 @@ class TicketInformation(BaseModel):
     iva_cantidad: str = Field()
     descuento: Optional[str] = Field()
     total: str = Field()
+    moneda: str = Field(description="The currency code on the ticket. For example: EUR, USD ...")
 
 class Task(BaseModel):
     dayWeek: str = Field(description="Día de la semana de lunes a viernes.")
